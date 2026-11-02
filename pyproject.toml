@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "etsy-listing-drafter"
+version = "0.1.0"
+description = "Local-first Python CLI that drafts Etsy listing titles, descriptions, and tags from item details using a configurable OpenAI-compatible endpoint (default Ollama). No API keys required."
+requires-python = ">=3.9"
+authors = [{ name = "Asdale Dynamics, LLC" }]
+license = { text = "MIT" }
+readme = "README.md"
+keywords = ["etsy", "cli", "llm", "ollama", "local-ai"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Environment :: Console",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+etsy-drafter = "etsy_drafter.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
