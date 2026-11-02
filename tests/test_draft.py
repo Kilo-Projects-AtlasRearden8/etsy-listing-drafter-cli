@@ -27,7 +27,8 @@ def test_draft_listing_parses_json_payload():
 
     assert result["title"] == "Hand-Knit Wool Scarf - Cozy Winter Accessory"
     assert "hand-knit wool scarf" in result["description"].lower()
-    assert result["tags"] == ["wool scarf", "hand knit", "winter accessory"]
+    assert result["tags"][:3] == ["wool scarf", "hand knit", "winter accessory"]
+    assert len(result["tags"]) == 13
     assert len(client.calls) == 1
     assert "hand-knit wool scarf" in client.calls[0][0][1]["content"]
 
@@ -46,10 +47,27 @@ def test_draft_listing_caps_tags_at_thirteen():
     assert len(result["tags"]) == 13
 
 
+def test_draft_listing_pads_tags_to_thirteen():
+    client = FakeClient(json.dumps({"title": "t", "description": "d", "tags": ["one", "two"]}))
+    result = draft_listing("item", client)
+    assert len(result["tags"]) == 13
+    assert result["tags"][0] == "one"
+    assert result["tags"][1] == "two"
+
+
+def test_draft_listing_deduplicates_tags():
+    tags = ["mug", "Mug", "mug ", "coffee mug", "coffee mug"]
+    client = FakeClient(json.dumps({"title": "t", "description": "d", "tags": tags}))
+    result = draft_listing("item", client)
+    assert result["tags"][:2] == ["mug", "coffee mug"]
+    assert len(result["tags"]) == 13  # padded after dedup
+
+
 def test_draft_listing_handles_comma_string_tags():
     client = FakeClient(json.dumps({"title": "t", "description": "d", "tags": "one, two, three"}))
     result = draft_listing("item", client)
-    assert result["tags"] == ["one", "two", "three"]
+    assert result["tags"][:3] == ["one", "two", "three"]
+    assert len(result["tags"]) == 13
 
 
 def test_draft_listing_falls_back_to_description_when_title_missing():

@@ -29,13 +29,38 @@ Respond with JSON only, using exactly these keys:
   "tags": ["tag1", "tag2", "..."]
 }}"""
 
+_TAG_FALLBACKS = [
+    "handmade", "etsy", "gift", "craft", "unique", "artisan", "vintage",
+    "accessory", "home", "decor", "jewelry", "clothing", "collectible",
+]
+
 
 def _coerce_tags(value: Any) -> list[str]:
     if isinstance(value, str):
-        return [tag.strip() for tag in value.split(",") if tag.strip()][:13]
-    if isinstance(value, list):
-        return [str(tag).strip() for tag in value if str(tag).strip()][:13]
-    return []
+        raw = [tag.strip() for tag in value.split(",") if tag.strip()]
+    elif isinstance(value, list):
+        raw = [str(tag).strip() for tag in value if str(tag).strip()]
+    else:
+        raw = []
+
+    seen: set[str] = set()
+    tags: list[str] = []
+    for tag in raw:
+        key = tag.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        tags.append(tag[:20])
+
+    while len(tags) < 13:
+        for fallback in _TAG_FALLBACKS:
+            if len(tags) >= 13:
+                break
+            if fallback not in seen:
+                tags.append(fallback)
+                seen.add(fallback)
+
+    return tags[:13]
 
 
 def _parse_draft_payload(content: str) -> dict[str, Any]:

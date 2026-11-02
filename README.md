@@ -1,20 +1,22 @@
 # Etsy Listing Drafter CLI
 
-A local-first Python CLI that drafts Etsy listing titles, descriptions, and tags
-from your item details using a configurable OpenAI-compatible endpoint — defaulting
-to Ollama, so it runs entirely on your machine with no API keys and no secrets.
+A warm, beginner-friendly Python CLI that drafts Etsy listing titles,
+descriptions, and tags from your item details. It talks to a configurable
+OpenAI-compatible endpoint — defaulting to Ollama on your own machine — so it
+runs entirely locally with no API keys, no sign-ups, and no secrets.
 
-Written in plain English, step by step, built by Dylan Asdale, founder of
-**Asdale Dynamics, LLC** (Indiana, formed October 2026) — beginner-friendly AI
-education, books, and practical tools.
+Built by Dylan Asdale, registered nurse turned AI author and founder of
+**Asdale Dynamics, LLC** (Indiana, formed October 2026). Plain English, step by
+step, never condescending — AI explained "like a friend would." Part of the
+LLC's open-source tools for resellers, authors, and small business owners.
 
 ## What it does
 
 `etsy-drafter draft` takes a few sentences about your item and returns:
 
-- A title (140 characters or fewer, keyword-forward)
-- A warm, helpful description (what it is, what it's for, materials, how to use it)
-- 13 tags (20 characters or fewer each)
+- A title (140 characters or fewer, keyword-forward, plain English)
+- A warm, helpful description (what it is, what it's for, materials, how to use it — no medical claims, no promises of results)
+- Exactly 13 tags (each 20 characters or fewer)
 
 Drafts are saved to a local JSON file and can be exported to CSV for your Etsy
 shop workflow. Nothing leaves your machine unless you choose to point it at a
@@ -36,8 +38,9 @@ PYTHONPATH=src python3 -m etsy_drafter --help
 
 ## Requirements
 
-- Python 3.9+ (standard library only — no `pip install` needed beyond the package itself)
-- An OpenAI-compatible chat endpoint. Default is Ollama at `http://localhost:11434/v1`
+- Python 3.9+ (standard library only — no third-party packages required)
+- An OpenAI-compatible chat endpoint. Default is Ollama at
+  `http://localhost:11434/v1`
 
 Start Ollama and pull a model:
 
@@ -50,7 +53,7 @@ ollama pull llama3.2    # or any chat model you like
 
 ### Draft a listing
 
-Interactive mode (type your item details, blank line to finish):
+Interactive mode (type your item details, press Enter on a blank line when done):
 
 ```bash
 etsy-drafter draft
@@ -68,18 +71,18 @@ Read details from a file:
 etsy-drafter draft --details-file notes.txt
 ```
 
-Override the endpoint or model:
+Example output:
 
-```bash
-etsy-drafter draft --details "..." --base-url http://localhost:11434/v1 --model llama3.2
-```
+```text
+============================================================
+Draft
+============================================================
+Title: Cream Wool Scarf - Hand Knit
 
-Environment variables work too:
+Description:
+Cozy cream hand-knit wool scarf.
 
-```bash
-export ETSY_DRAFTER_BASE_URL=http://localhost:11434/v1
-export ETSY_DRAFTER_MODEL=llama3.2
-export ETSY_DRAFTER_STORAGE=~/.etsy_drafter/listings.json
+Tags: wool scarf, hand knit, cream, handmade, etsy, gift, craft, ...
 ```
 
 ### List stored drafts
@@ -94,19 +97,55 @@ etsy-drafter list
 etsy-drafter export --out etsy-listings.csv
 ```
 
-Columns: `id, created_at, title, description, tags, item_details`. Tags are
-joined with `; `.
+Example `etsy-listings.csv`:
 
-## Configuration
+```csv
+id,created_at,title,description,tags,item_details
+680b33f3...,2026-11-02T14:00:21+00:00,Cream Wool Scarf - Hand Knit,Cozy cream hand-knit wool scarf.,wool scarf; hand knit; cream; handmade; etsy; gift; craft; unique; artisan; vintage; accessory; home; decor,"A cream hand-knit wool scarf, about 60 inches long."
+```
 
-| Option | Env var | Default |
-|--------|---------|---------|
-| Endpoint base URL | `ETSY_DRAFTER_BASE_URL` | `http://localhost:11434/v1` |
-| Model | `ETSY_DRAFTER_MODEL` | `llama3.2` |
-| Timeout (seconds) | `ETSY_DRAFTER_TIMEOUT` | `60` |
-| Storage path | `ETSY_DRAFTER_STORAGE` | `~/.etsy_drafter/listings.json` |
+Columns: `id`, `created_at`, `title`, `description`, `tags`, `item_details`.
+Tags are joined with `; `.
 
-CLI flags (`--base-url`, `--model`, `--storage`) override environment variables.
+### Configure endpoint, model, storage
+
+| Option | Env var | Default | CLI flag |
+|--------|---------|---------|----------|
+| Endpoint base URL | `ETSY_DRAFTER_BASE_URL` | `http://localhost:11434/v1` | `--base-url` |
+| Model | `ETSY_DRAFTER_MODEL` | `llama3.2` | `--model` |
+| Timeout (seconds) | `ETSY_DRAFTER_TIMEOUT` | `60` | (draft only) |
+| Storage path | `ETSY_DRAFTER_STORAGE` | `~/.etsy_drafter/listings.json` | `--storage` |
+
+CLI flags override environment variables.
+
+## Troubleshooting
+
+**`Could not reach LLM endpoint at http://localhost:11434/v1`**
+
+Make sure Ollama is running and a model is pulled:
+
+```bash
+ollama serve
+ollama pull llama3.2
+```
+
+Or point the tool at another OpenAI-compatible endpoint:
+
+```bash
+etsy-drafter draft --details "..." \
+  --base-url http://your-endpoint/v1 \
+  --model your-model
+```
+
+**`LLM endpoint returned unexpected response shape`**
+
+The model may not have returned JSON. The tool tries to repair imperfect JSON
+and falls back gracefully, but results are best with a capable chat model.
+
+**No drafts found**
+
+Drafts are stored at `~/.etsy_drafter/listings.json` by default. Use
+`--storage` or `ETSY_DRAFTER_STORAGE` to check a different location.
 
 ## Testing
 

@@ -14,8 +14,9 @@ Asdale Dynamics, LLC.
   endpoint is unreachable or returns bad data. No API keys, no secrets.
 - `src/etsy_drafter/draft.py` — prompt templates (warm, plain English, beginner
   friendly, never condescending) and drafting logic: title ≤140 chars,
-  description, exactly 13 tags ≤20 chars each. Repairs imperfect model JSON
-  output; falls back sensibly.
+  description, exactly 13 tags ≤20 chars each (padded with fallbacks if the
+  model returns fewer, deduplicated case-insensitively). Repairs imperfect
+  model JSON output; falls back sensibly.
 - `src/etsy_drafter/storage.py` — local JSON storage
   (`~/.etsy_drafter/listings.json`, overridable via `ETSY_DRAFTER_STORAGE` or
   `--storage`). Atomic writes (temp file + `os.replace`), UUID ids, UTC
@@ -25,13 +26,15 @@ Asdale Dynamics, LLC.
   `; `).
 - `src/etsy_drafter/__main__.py` — argparse CLI: `draft` (interactive or
   `--details` / `--details-file`), `list`, `export --out`.
-- `tests/` — 23 tests: client unit tests (mocked `urlopen`), draft logic,
-  storage round trip, CSV export, CLI surface, and an integration test against
-  a real mock HTTP endpoint on localhost (`tests/test_mock_endpoint.py`).
+- `tests/` — 25 tests: client unit tests (mocked `urlopen`), draft logic
+  (including tag padding/dedup), storage round trip, CSV export, CLI surface,
+  and an integration test against a real mock HTTP endpoint on localhost
+  (`tests/test_mock_endpoint.py`).
 - `LICENSE` — MIT, copyright line exactly
   `Copyright (c) 2026 Asdale Dynamics, LLC`.
-- `README.md` — install, usage, configuration, testing, credit to Asdale
-  Dynamics, LLC, license. No `.github/workflows` files.
+- `README.md` — install, usage with example output, configuration table,
+  troubleshooting, example CSV, testing, credit to Asdale Dynamics, LLC,
+  license. No `.github/workflows` files.
 
 ## How to run
 
@@ -52,15 +55,15 @@ ETSY_DRAFTER_BASE_URL=http://localhost:11434/v1 ETSY_DRAFTER_MODEL=llama3.2 .ven
 
 ## Verification results
 
-- `pytest`: 23 passed, including the mock OpenAI-compatible endpoint
+- `pytest`: 25 passed, including the mock OpenAI-compatible endpoint
   integration test (no real model or network required).
 - `pip wheel .`: builds cleanly (`etsy_listing_drafter-0.1.0-py3-none-any.whl`).
 - CLI smoke test against a live mock endpoint: `draft` → saved draft with
-  title/description/tags; `list` shows it; `export --out` writes valid CSV.
+  title/description/tags (exactly 13); `list` shows it; `export --out` writes
+  valid CSV with all columns.
 - Unreachable endpoint → clear error message, exit code 1.
-- Git initialized; initial commit `af8c3cb` "Initial commit: Etsy listing
-  drafter CLI" (17 files), existing identity only, no co-author trailers,
-  nothing pushed.
+- Git initialized; two commits on `master`, existing identity only, no
+  co-author trailers, nothing pushed.
 
 ## Known gaps
 
@@ -69,5 +72,5 @@ ETSY_DRAFTER_BASE_URL=http://localhost:11434/v1 ETSY_DRAFTER_MODEL=llama3.2 .ven
 - Interactive `draft` reads from stdin; not suited to non-TTY automation
   without `--details` / `--details-file`.
 - JSON storage is a single file with no file locking; single-writer use only.
-- Tags are taken as-is from the model (no deduplication beyond the prompt).
+- Tag padding uses generic fallback tags when the model returns fewer than 13.
 - No PyPI publication; intended to be installed from source (`pip install -e .`).
