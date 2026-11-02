@@ -1,29 +1,31 @@
+
 # Bytecode / packaging
-__pycache__/
-*.py[cod]
-*.egg-info/
-*.egg
-dist/
-build/
-.eggs/
-
-# Virtual environments
-.venv/
-venv/
-env/
-
-# Local draft storage (default locations)
-listings.json
-.etsy_drafter/
-
 # Editor / OS
-.vscode/
-.idea/
-.DS_Store
-Thumbs.db
-
+# Local draft storage (default locations)
 # Test artifacts
-.pytest_cache/
+# Virtual environments
+*.egg
+*.egg-info/
+*.py[cod]
+*.pyc
+.DS_Store
 .coverage
-htmlcov/
+.eggs/
+.env
+.env.*
+.etsy_drafter/
+.idea/
+.pytest_cache/
 .tox/
+.venv/
+.vscode/
+Thumbs.db
+__pycache__/
+build/
+dist/
+dist/*.tmp
+env/
+htmlcov/
+listings.json
+node_modules/
+venv/
